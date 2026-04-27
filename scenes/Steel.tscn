@@ -1,0 +1,27 @@
+[gd_scene load_steps=3 format=3 uid="uid://b0godot4steel01"]
+
+[ext_resource type="Script" path="res://scripts/wall.gd" id="1_wall"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_steel"]
+size = Vector2(32, 32)
+
+[node name="Steel" type="StaticBody2D"]
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("1_wall")
+wall_type = 1
+
+[node name="Base" type="Polygon2D" parent="."]
+color = Color(0.65, 0.68, 0.72, 1)
+polygon = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
+
+[node name="HighlightTL" type="Polygon2D" parent="."]
+color = Color(0.85, 0.88, 0.92, 1)
+polygon = PackedVector2Array(-16, -16, 16, -16, 12, -12, -12, -12, -12, 12, -16, 16)
+
+[node name="ShadowBR" type="Polygon2D" parent="."]
+color = Color(0.40, 0.42, 0.46, 1)
+polygon = PackedVector2Array(16, -16, 16, 16, -16, 16, -12, 12, 12, 12, 12, -12)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_steel")

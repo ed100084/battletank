@@ -1,149 +1,103 @@
-[gd_scene load_steps=4 format=3 uid="uid://b0godot4main00"]
+[gd_scene load_steps=10 format=3 uid="uid://b0godot4main00"]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://b0godot4tank01" path="res://scenes/Tank.tscn" id="2_tank"]
+[ext_resource type="PackedScene" uid="uid://b0godot4bullet01" path="res://scenes/Bullet.tscn" id="3_bullet"]
+[ext_resource type="PackedScene" uid="uid://b0godot4brick01" path="res://scenes/Brick.tscn" id="4_brick"]
+[ext_resource type="PackedScene" uid="uid://b0godot4steel01" path="res://scenes/Steel.tscn" id="5_steel"]
+[ext_resource type="PackedScene" uid="uid://b0godot4eagle01" path="res://scenes/Eagle.tscn" id="6_eagle"]
 
 [sub_resource type="SystemFont" id="SystemFont_cjk"]
-font_names = PackedStringArray("Microsoft JhengHei UI", "Microsoft JhengHei", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK TC", "Noto Sans CJK SC", "PingFang TC", "Arial Unicode MS", "sans-serif")
+font_names = PackedStringArray("Microsoft JhengHei UI", "Microsoft JhengHei", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK TC", "PingFang TC", "sans-serif")
 
 [sub_resource type="Theme" id="Theme_main"]
 default_font = SubResource("SystemFont_cjk")
 default_font_size = 22
 
-[node name="Main" type="Control"]
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+tank_scene = ExtResource("2_tank")
+bullet_scene = ExtResource("3_bullet")
+brick_scene = ExtResource("4_brick")
+steel_scene = ExtResource("5_steel")
+eagle_scene = ExtResource("6_eagle")
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.07, 0.07, 0.09, 1)
+
+[node name="ArenaFrame" type="ColorRect" parent="."]
+offset_left = 36.0
+offset_top = 36.0
+offset_right = 460.0
+offset_bottom = 460.0
+color = Color(0.13, 0.14, 0.16, 1)
+
+[node name="Arena" type="Node2D" parent="."]
+position = Vector2(40, 40)
+
+[node name="SpawnTimer" type="Timer" parent="."]
+wait_time = 2.5
+autostart = false
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Panel" type="Control" parent="UI"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 theme = SubResource("Theme_main")
-script = ExtResource("1_main")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Title" type="Label" parent="UI/Panel"]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-color = Color(0.09, 0.13, 0.20, 1)
+offset_left = 480.0
+offset_top = 50.0
+offset_right = 1180.0
+offset_bottom = 110.0
+text = "⚔  坦克大決戰"
+theme_override_font_sizes/font_size = 44
 
-[node name="FieldStripe" type="ColorRect" parent="."]
+[node name="Info" type="Label" parent="UI/Panel"]
 layout_mode = 1
-anchor_top = 0.55
-anchor_right = 1.0
-anchor_bottom = 0.65
-color = Color(0.13, 0.30, 0.18, 1)
+offset_left = 480.0
+offset_top = 130.0
+offset_right = 1180.0
+offset_bottom = 280.0
+text = "玩家命數：3
+剩餘敵軍：5
+場上敵軍：0"
+theme_override_font_sizes/font_size = 26
 
-[node name="Layout" type="VBoxContainer" parent="."]
+[node name="HelpTitle" type="Label" parent="UI/Panel"]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 60.0
-offset_top = 30.0
-offset_right = -60.0
-offset_bottom = -30.0
-theme_override_constants/separation = 14
+offset_left = 480.0
+offset_top = 320.0
+offset_right = 1180.0
+offset_bottom = 360.0
+text = "操 作"
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.6, 0.85, 1, 1)
 
-[node name="Title" type="Label" parent="Layout"]
-layout_mode = 2
-text = "⚾  野 球 拳   YAKYUKEN  ⚾"
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 42
-
-[node name="RoundLabel" type="Label" parent="Layout"]
-layout_mode = 2
-text = "Round 1   (先贏 3 局)"
-horizontal_alignment = 1
+[node name="Help" type="Label" parent="UI/Panel"]
+layout_mode = 1
+offset_left = 480.0
+offset_top = 360.0
+offset_right = 1180.0
+offset_bottom = 540.0
+text = "← → ↑ ↓     移動坦克
+SPACE        開砲
+保護中央下方的老鷹基地，
+殲滅 5 台敵軍坦克即勝利。"
 theme_override_font_sizes/font_size = 20
 
-[node name="ScoreLabel" type="Label" parent="Layout"]
-layout_mode = 2
-text = "0   :   0"
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 56
-
-[node name="Hands" type="HBoxContainer" parent="Layout"]
-layout_mode = 2
-alignment = 1
-theme_override_constants/separation = 60
-
-[node name="PlayerCol" type="VBoxContainer" parent="Layout/Hands"]
-layout_mode = 2
-
-[node name="PlayerLabel" type="Label" parent="Layout/Hands/PlayerCol"]
-layout_mode = 2
-text = "PLAYER (你)"
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 22
-
-[node name="PlayerHand" type="Label" parent="Layout/Hands/PlayerCol"]
-custom_minimum_size = Vector2(280, 120)
-layout_mode = 2
-text = "—"
-horizontal_alignment = 1
-vertical_alignment = 1
-theme_override_font_sizes/font_size = 64
-theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
-
-[node name="VS" type="Label" parent="Layout/Hands"]
-layout_mode = 2
-text = "VS"
-vertical_alignment = 1
-theme_override_font_sizes/font_size = 36
-
-[node name="CpuCol" type="VBoxContainer" parent="Layout/Hands"]
-layout_mode = 2
-
-[node name="CpuLabel" type="Label" parent="Layout/Hands/CpuCol"]
-layout_mode = 2
-text = "CPU"
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 22
-
-[node name="CpuHand" type="Label" parent="Layout/Hands/CpuCol"]
-custom_minimum_size = Vector2(280, 120)
-layout_mode = 2
-text = "—"
-horizontal_alignment = 1
-vertical_alignment = 1
-theme_override_font_sizes/font_size = 64
-theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
-
-[node name="ResultLabel" type="Label" parent="Layout"]
-layout_mode = 2
+[node name="Status" type="Label" parent="UI/Panel"]
+visible = false
+layout_mode = 1
+offset_left = 480.0
+offset_top = 560.0
+offset_right = 1180.0
+offset_bottom = 700.0
 text = ""
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 38
-
-[node name="StatusLabel" type="Label" parent="Layout"]
-layout_mode = 2
-text = "選擇你的拳！"
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 22
-
-[node name="Buttons" type="HBoxContainer" parent="Layout"]
-layout_mode = 2
-alignment = 1
-theme_override_constants/separation = 24
-
-[node name="RockBtn" type="Button" parent="Layout/Buttons"]
-custom_minimum_size = Vector2(180, 64)
-layout_mode = 2
-text = "石頭 ✊"
-theme_override_font_sizes/font_size = 26
-
-[node name="ScissorsBtn" type="Button" parent="Layout/Buttons"]
-custom_minimum_size = Vector2(180, 64)
-layout_mode = 2
-text = "剪刀 ✌"
-theme_override_font_sizes/font_size = 26
-
-[node name="PaperBtn" type="Button" parent="Layout/Buttons"]
-custom_minimum_size = Vector2(180, 64)
-layout_mode = 2
-text = "布 ✋"
-theme_override_font_sizes/font_size = 26
-
-[node name="RestartBtn" type="Button" parent="Layout"]
-custom_minimum_size = Vector2(0, 56)
-layout_mode = 2
-text = "再來一場 (SPACE)"
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 30

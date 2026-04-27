@@ -1,126 +1,143 @@
-extends Control
-## 野球拳 (Yakyuken) - 棒球主題猜拳
-## 先贏 ROUNDS_TO_WIN 局者勝
+extends Node2D
+## 坦克大決戰 - 主場景
 
-enum Hand { ROCK, SCISSORS, PAPER }
+const MAP: Array[String] = [
+	".............",
+	"..BBB...BBB..",
+	"..B.B...B.B..",
+	"..B.B.B.B.B..",
+	"..BBB.B.BBB..",
+	".....SSS.....",
+	"......S......",
+	".....SSS.....",
+	"..BBB.B.BBB..",
+	"..B.B.B.B.B..",
+	"..B.B...B.B..",
+	".....BBB.....",
+	".....BEB.....",
+]
 
-const HAND_NAMES := {
-	Hand.ROCK: "石頭",
-	Hand.SCISSORS: "剪刀",
-	Hand.PAPER: "布",
-}
+const ENEMY_TOTAL: int = 5
+const ENEMY_MAX_ON_FIELD: int = 3
+const ENEMY_SPAWNS: Array[Vector2i] = [Vector2i(0, 0), Vector2i(6, 0), Vector2i(12, 0)]
+const PLAYER_SPAWN: Vector2i = Vector2i(4, 12)
 
-const ROUNDS_TO_WIN: int = 3
-const REVEAL_DELAY: float = 0.7
+@export var tank_scene: PackedScene
+@export var bullet_scene: PackedScene
+@export var brick_scene: PackedScene
+@export var steel_scene: PackedScene
+@export var eagle_scene: PackedScene
 
-@onready var player_hand_label: Label = $Layout/Hands/PlayerCol/PlayerHand
-@onready var cpu_hand_label: Label = $Layout/Hands/CpuCol/CpuHand
-@onready var score_label: Label = $Layout/ScoreLabel
-@onready var round_label: Label = $Layout/RoundLabel
-@onready var result_label: Label = $Layout/ResultLabel
-@onready var status_label: Label = $Layout/StatusLabel
-@onready var rock_btn: Button = $Layout/Buttons/RockBtn
-@onready var scissors_btn: Button = $Layout/Buttons/ScissorsBtn
-@onready var paper_btn: Button = $Layout/Buttons/PaperBtn
-@onready var restart_btn: Button = $Layout/RestartBtn
+var enemies_remaining: int = ENEMY_TOTAL
+var enemies_spawned: int = 0
+var enemies_alive: int = 0
+var player_lives: int = 3
+var is_game_over: bool = false
 
-var player_score: int = 0
-var cpu_score: int = 0
-var round_num: int = 1
-var is_finished: bool = false
-var is_revealing: bool = false
+@onready var arena: Node2D = $Arena
+@onready var spawn_timer: Timer = $SpawnTimer
+@onready var info_label: Label = $UI/Panel/Info
+@onready var status_label: Label = $UI/Panel/Status
 
 func _ready() -> void:
 	randomize()
-	rock_btn.pressed.connect(_on_rock)
-	scissors_btn.pressed.connect(_on_scissors)
-	paper_btn.pressed.connect(_on_paper)
-	restart_btn.pressed.connect(_restart)
-	restart_btn.visible = false
-	result_label.text = ""
-	status_label.text = "選擇你的拳！"
+	status_label.visible = false
+	_build_map()
+	spawn_timer.timeout.connect(_try_spawn_enemy)
+	spawn_timer.start()
+	_spawn_player()
 	_update_ui()
 
-func _on_rock() -> void: _play(Hand.ROCK)
-func _on_scissors() -> void: _play(Hand.SCISSORS)
-func _on_paper() -> void: _play(Hand.PAPER)
+func _build_map() -> void:
+	var ts: int = GameConst.TILE_SIZE
+	for y in range(MAP.size()):
+		var row: String = MAP[y]
+		for x in range(row.length()):
+			var c: String = row.substr(x, 1)
+			var pos := Vector2(x * ts + ts / 2.0, y * ts + ts / 2.0)
+			match c:
+				"B":
+					var w := brick_scene.instantiate()
+					w.position = pos
+					arena.add_child(w)
+				"S":
+					var w := steel_scene.instantiate()
+					w.position = pos
+					arena.add_child(w)
+				"E":
+					var e := eagle_scene.instantiate()
+					e.position = pos
+					e.destroyed.connect(_on_eagle_destroyed)
+					arena.add_child(e)
 
-func _play(player_hand: int) -> void:
-	if is_finished or is_revealing:
+func _spawn_player() -> void:
+	var ts: int = GameConst.TILE_SIZE
+	var t: Tank = tank_scene.instantiate()
+	t.position = Vector2(PLAYER_SPAWN.x * ts + ts / 2.0, PLAYER_SPAWN.y * ts + ts / 2.0)
+	t.is_player = true
+	t.move_speed = GameConst.PLAYER_SPEED
+	t.body_color = Color(0.95, 0.85, 0.30)
+	t.bullet_scene = bullet_scene
+	t.died.connect(_on_player_died)
+	arena.add_child(t)
+
+func _try_spawn_enemy() -> void:
+	if is_game_over:
 		return
-	is_revealing = true
-	_set_buttons_disabled(true)
-
-	player_hand_label.text = "？"
-	cpu_hand_label.text = "？"
-	result_label.text = ""
-	status_label.text = "野・球・けん！"
-
-	await get_tree().create_timer(REVEAL_DELAY).timeout
-
-	var cpu_hand: int = randi() % 3
-	player_hand_label.text = HAND_NAMES[player_hand]
-	cpu_hand_label.text = HAND_NAMES[cpu_hand]
-
-	var outcome: int = _judge(player_hand, cpu_hand)
-	match outcome:
-		1:
-			player_score += 1
-			result_label.text = "WIN  ⚾"
-			result_label.modulate = Color(0.4, 1.0, 0.5, 1)
-		-1:
-			cpu_score += 1
-			result_label.text = "LOSE  ✕"
-			result_label.modulate = Color(1.0, 0.4, 0.4, 1)
-		0:
-			result_label.text = "DRAW  ─"
-			result_label.modulate = Color(1.0, 0.95, 0.4, 1)
-
-	if outcome != 0:
-		round_num += 1
-
+	if enemies_alive >= ENEMY_MAX_ON_FIELD:
+		return
+	if enemies_spawned >= ENEMY_TOTAL:
+		return
+	var ts: int = GameConst.TILE_SIZE
+	var spawn: Vector2i = ENEMY_SPAWNS.pick_random()
+	var t: Tank = tank_scene.instantiate()
+	t.position = Vector2(spawn.x * ts + ts / 2.0, spawn.y * ts + ts / 2.0)
+	t.is_player = false
+	t.move_speed = GameConst.ENEMY_SPEED
+	t.body_color = Color(0.75, 0.40, 0.40)
+	t.bullet_scene = bullet_scene
+	t.died.connect(_on_enemy_died)
+	arena.add_child(t)
+	enemies_spawned += 1
+	enemies_alive += 1
 	_update_ui()
 
-	if player_score >= ROUNDS_TO_WIN or cpu_score >= ROUNDS_TO_WIN:
-		_finish()
-	else:
-		status_label.text = "選擇你的拳！"
-		_set_buttons_disabled(false)
+func _on_player_died() -> void:
+	player_lives -= 1
+	_update_ui()
+	if player_lives <= 0:
+		_game_over(false, "PLAYER 全滅")
+		return
+	await get_tree().create_timer(1.0).timeout
+	if not is_game_over:
+		_spawn_player()
 
-	is_revealing = false
+func _on_enemy_died() -> void:
+	enemies_alive -= 1
+	enemies_remaining -= 1
+	_update_ui()
+	if enemies_remaining <= 0:
+		_game_over(true, "")
 
-func _judge(p: int, c: int) -> int:
-	if p == c:
-		return 0
-	if (p == Hand.ROCK and c == Hand.SCISSORS) \
-			or (p == Hand.SCISSORS and c == Hand.PAPER) \
-			or (p == Hand.PAPER and c == Hand.ROCK):
-		return 1
-	return -1
+func _on_eagle_destroyed() -> void:
+	_game_over(false, "老鷹基地被摧毀")
 
 func _update_ui() -> void:
-	score_label.text = "%d   :   %d" % [player_score, cpu_score]
-	round_label.text = "Round %d   (先贏 %d 局)" % [round_num, ROUNDS_TO_WIN]
+	info_label.text = "玩家命數：%d\n剩餘敵軍：%d\n場上敵軍：%d" % [player_lives, enemies_remaining, enemies_alive]
 
-func _set_buttons_disabled(d: bool) -> void:
-	rock_btn.disabled = d
-	scissors_btn.disabled = d
-	paper_btn.disabled = d
-
-func _finish() -> void:
-	is_finished = true
-	_set_buttons_disabled(true)
-	restart_btn.visible = true
-	if player_score > cpu_score:
-		status_label.text = "🏆 全壘打！PLAYER 勝利！"
+func _game_over(victory: bool, reason: String) -> void:
+	if is_game_over:
+		return
+	is_game_over = true
+	spawn_timer.stop()
+	status_label.visible = true
+	if victory:
+		status_label.text = "🏆 VICTORY!\n殲滅全部敵軍\n\n按任意鍵重新開始"
 		status_label.modulate = Color(0.4, 1.0, 0.5, 1)
 	else:
-		status_label.text = "💀 三振出局… CPU 勝利"
+		status_label.text = "💀 GAME OVER\n%s\n\n按任意鍵重新開始" % reason
 		status_label.modulate = Color(1.0, 0.4, 0.4, 1)
 
-func _restart() -> void:
-	get_tree().reload_current_scene()
-
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_accept") and is_finished:
-		_restart()
+	if is_game_over and event is InputEventKey and event.pressed:
+		get_tree().reload_current_scene()
