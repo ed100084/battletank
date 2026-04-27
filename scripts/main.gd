@@ -69,6 +69,28 @@ func _build_map() -> void:
 					e.position = pos
 					e.destroyed.connect(_on_eagle_destroyed)
 					arena.add_child(e)
+	_add_boundary_walls()
+
+func _add_boundary_walls() -> void:
+	var w: float = float(GameConst.MAP_PX_W)
+	var h: float = float(GameConst.MAP_PX_H)
+	# 上 / 下 / 左 / 右 邊界 (隱形 StaticBody2D)
+	_add_invisible_wall(Vector2(w / 2.0, -16.0),  Vector2(w + 64.0, 32.0))
+	_add_invisible_wall(Vector2(w / 2.0, h + 16.0), Vector2(w + 64.0, 32.0))
+	_add_invisible_wall(Vector2(-16.0, h / 2.0),  Vector2(32.0, h + 64.0))
+	_add_invisible_wall(Vector2(w + 16.0, h / 2.0), Vector2(32.0, h + 64.0))
+
+func _add_invisible_wall(pos: Vector2, size: Vector2) -> void:
+	var wall := StaticBody2D.new()
+	wall.collision_layer = 1
+	wall.collision_mask = 0
+	wall.position = pos
+	var cs := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = size
+	cs.shape = rect
+	wall.add_child(cs)
+	arena.add_child(wall)
 
 func _spawn_player() -> void:
 	var ts: int = GameConst.TILE_SIZE
