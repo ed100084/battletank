@@ -1,15 +1,86 @@
-[gd_scene load_steps=2 format=3 uid="uid://b0godot4main00"]
+[gd_scene load_steps=6 format=3 uid="uid://b0godot4main00"]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/basket.gd" id="2_basket"]
+[ext_resource type="PackedScene" uid="uid://b0godot4apple01" path="res://scenes/Apple.tscn" id="3_apple"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_basket"]
+size = Vector2(120, 30)
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
+apple_scene = ExtResource("3_apple")
 
-[node name="Label" type="Label" parent="."]
-offset_left = 480.0
-offset_top = 320.0
-offset_right = 800.0
-offset_bottom = 400.0
-text = "Hello, Godot 4.x!
-Press ESC to pause."
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.1, 0.13, 0.18, 1)
+
+[node name="Ground" type="ColorRect" parent="."]
+offset_top = 700.0
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.18, 0.22, 0.28, 1)
+
+[node name="Basket" type="Area2D" parent="." groups=["basket"]]
+position = Vector2(640, 670)
+script = ExtResource("2_basket")
+
+[node name="Visual" type="Polygon2D" parent="Basket"]
+color = Color(0.55, 0.35, 0.18, 1)
+polygon = PackedVector2Array(-60, -15, 60, -15, 50, 15, -50, 15)
+
+[node name="Rim" type="Polygon2D" parent="Basket"]
+color = Color(0.4, 0.25, 0.12, 1)
+polygon = PackedVector2Array(-62, -18, 62, -18, 60, -12, -60, -12)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Basket"]
+shape = SubResource("RectangleShape2D_basket")
+
+[node name="SpawnTimer" type="Timer" parent="."]
+wait_time = 1.2
+autostart = true
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="ScoreLabel" type="Label" parent="UI"]
+offset_left = 20.0
+offset_top = 16.0
+offset_right = 320.0
+offset_bottom = 60.0
+text = "Score: 0"
+theme_override_font_sizes/font_size = 28
+
+[node name="LivesLabel" type="Label" parent="UI"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.0
+offset_top = 16.0
+offset_right = -20.0
+offset_bottom = 60.0
+text = "Lives: 3"
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 28
+
+[node name="InstructionLabel" type="Label" parent="UI"]
+offset_left = 20.0
+offset_top = 60.0
+offset_right = 700.0
+offset_bottom = 90.0
+text = "←/→ 移動籃子接住蘋果，漏 3 顆 Game Over"
+theme_override_font_sizes/font_size = 16
+
+[node name="GameOverLabel" type="Label" parent="UI"]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -100.0
+offset_right = 320.0
+offset_bottom = 120.0
+text = "GAME OVER"
 horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 40
