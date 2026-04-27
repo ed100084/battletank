@@ -1,86 +1,149 @@
-[gd_scene load_steps=6 format=3 uid="uid://b0godot4main00"]
+[gd_scene load_steps=4 format=3 uid="uid://b0godot4main00"]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
-[ext_resource type="Script" path="res://scripts/basket.gd" id="2_basket"]
-[ext_resource type="PackedScene" uid="uid://b0godot4apple01" path="res://scenes/Apple.tscn" id="3_apple"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_basket"]
-size = Vector2(120, 30)
+[sub_resource type="SystemFont" id="SystemFont_cjk"]
+font_names = PackedStringArray("Microsoft JhengHei UI", "Microsoft JhengHei", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK TC", "Noto Sans CJK SC", "PingFang TC", "Arial Unicode MS", "sans-serif")
 
-[node name="Main" type="Node2D"]
+[sub_resource type="Theme" id="Theme_main"]
+default_font = SubResource("SystemFont_cjk")
+default_font_size = 22
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = SubResource("Theme_main")
 script = ExtResource("1_main")
-apple_scene = ExtResource("3_apple")
 
 [node name="Background" type="ColorRect" parent="."]
-offset_right = 1280.0
-offset_bottom = 720.0
-color = Color(0.1, 0.13, 0.18, 1)
-
-[node name="Ground" type="ColorRect" parent="."]
-offset_top = 700.0
-offset_right = 1280.0
-offset_bottom = 720.0
-color = Color(0.18, 0.22, 0.28, 1)
-
-[node name="Basket" type="Area2D" parent="." groups=["basket"]]
-position = Vector2(640, 670)
-script = ExtResource("2_basket")
-
-[node name="Visual" type="Polygon2D" parent="Basket"]
-color = Color(0.55, 0.35, 0.18, 1)
-polygon = PackedVector2Array(-60, -15, 60, -15, 50, 15, -50, 15)
-
-[node name="Rim" type="Polygon2D" parent="Basket"]
-color = Color(0.4, 0.25, 0.12, 1)
-polygon = PackedVector2Array(-62, -18, 62, -18, 60, -12, -60, -12)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Basket"]
-shape = SubResource("RectangleShape2D_basket")
-
-[node name="SpawnTimer" type="Timer" parent="."]
-wait_time = 1.2
-autostart = true
-
-[node name="UI" type="CanvasLayer" parent="."]
-
-[node name="ScoreLabel" type="Label" parent="UI"]
-offset_left = 20.0
-offset_top = 16.0
-offset_right = 320.0
-offset_bottom = 60.0
-text = "Score: 0"
-theme_override_font_sizes/font_size = 28
-
-[node name="LivesLabel" type="Label" parent="UI"]
-anchor_left = 1.0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
-offset_left = -220.0
-offset_top = 16.0
-offset_right = -20.0
-offset_bottom = 60.0
-text = "Lives: 3"
-horizontal_alignment = 2
-theme_override_font_sizes/font_size = 28
+anchor_bottom = 1.0
+color = Color(0.09, 0.13, 0.20, 1)
 
-[node name="InstructionLabel" type="Label" parent="UI"]
-offset_left = 20.0
-offset_top = 60.0
-offset_right = 700.0
-offset_bottom = 90.0
-text = "←/→ 移動籃子接住蘋果，漏 3 顆 Game Over"
-theme_override_font_sizes/font_size = 16
+[node name="FieldStripe" type="ColorRect" parent="."]
+layout_mode = 1
+anchor_top = 0.55
+anchor_right = 1.0
+anchor_bottom = 0.65
+color = Color(0.13, 0.30, 0.18, 1)
 
-[node name="GameOverLabel" type="Label" parent="UI"]
-visible = false
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -320.0
-offset_top = -100.0
-offset_right = 320.0
-offset_bottom = 120.0
-text = "GAME OVER"
+[node name="Layout" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 60.0
+offset_top = 30.0
+offset_right = -60.0
+offset_bottom = -30.0
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="Layout"]
+layout_mode = 2
+text = "⚾  野 球 拳   YAKYUKEN  ⚾"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 42
+
+[node name="RoundLabel" type="Label" parent="Layout"]
+layout_mode = 2
+text = "Round 1   (先贏 3 局)"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 20
+
+[node name="ScoreLabel" type="Label" parent="Layout"]
+layout_mode = 2
+text = "0   :   0"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 56
+
+[node name="Hands" type="HBoxContainer" parent="Layout"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 60
+
+[node name="PlayerCol" type="VBoxContainer" parent="Layout/Hands"]
+layout_mode = 2
+
+[node name="PlayerLabel" type="Label" parent="Layout/Hands/PlayerCol"]
+layout_mode = 2
+text = "PLAYER (你)"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 22
+
+[node name="PlayerHand" type="Label" parent="Layout/Hands/PlayerCol"]
+custom_minimum_size = Vector2(280, 120)
+layout_mode = 2
+text = "—"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 64
+theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
+
+[node name="VS" type="Label" parent="Layout/Hands"]
+layout_mode = 2
+text = "VS"
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 36
+
+[node name="CpuCol" type="VBoxContainer" parent="Layout/Hands"]
+layout_mode = 2
+
+[node name="CpuLabel" type="Label" parent="Layout/Hands/CpuCol"]
+layout_mode = 2
+text = "CPU"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 22
+
+[node name="CpuHand" type="Label" parent="Layout/Hands/CpuCol"]
+custom_minimum_size = Vector2(280, 120)
+layout_mode = 2
+text = "—"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 64
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+
+[node name="ResultLabel" type="Label" parent="Layout"]
+layout_mode = 2
+text = ""
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 38
+
+[node name="StatusLabel" type="Label" parent="Layout"]
+layout_mode = 2
+text = "選擇你的拳！"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 22
+
+[node name="Buttons" type="HBoxContainer" parent="Layout"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 24
+
+[node name="RockBtn" type="Button" parent="Layout/Buttons"]
+custom_minimum_size = Vector2(180, 64)
+layout_mode = 2
+text = "石頭 ✊"
+theme_override_font_sizes/font_size = 26
+
+[node name="ScissorsBtn" type="Button" parent="Layout/Buttons"]
+custom_minimum_size = Vector2(180, 64)
+layout_mode = 2
+text = "剪刀 ✌"
+theme_override_font_sizes/font_size = 26
+
+[node name="PaperBtn" type="Button" parent="Layout/Buttons"]
+custom_minimum_size = Vector2(180, 64)
+layout_mode = 2
+text = "布 ✋"
+theme_override_font_sizes/font_size = 26
+
+[node name="RestartBtn" type="Button" parent="Layout"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+text = "再來一場 (SPACE)"
+theme_override_font_sizes/font_size = 22
