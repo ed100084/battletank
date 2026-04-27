@@ -72,7 +72,7 @@ func _build_map() -> void:
 
 func _spawn_player() -> void:
 	var ts: int = GameConst.TILE_SIZE
-	var t: Tank = tank_scene.instantiate()
+	var t = tank_scene.instantiate()
 	t.position = Vector2(PLAYER_SPAWN.x * ts + ts / 2.0, PLAYER_SPAWN.y * ts + ts / 2.0)
 	t.is_player = true
 	t.move_speed = GameConst.PLAYER_SPEED
@@ -90,7 +90,7 @@ func _try_spawn_enemy() -> void:
 		return
 	var ts: int = GameConst.TILE_SIZE
 	var spawn: Vector2i = ENEMY_SPAWNS.pick_random()
-	var t: Tank = tank_scene.instantiate()
+	var t = tank_scene.instantiate()
 	t.position = Vector2(spawn.x * ts + ts / 2.0, spawn.y * ts + ts / 2.0)
 	t.is_player = false
 	t.move_speed = GameConst.ENEMY_SPEED

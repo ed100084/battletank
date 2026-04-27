@@ -1,5 +1,5 @@
-class_name GameConst
-## 遊戲全域常數
+extends Node
+## 遊戲全域常數 (autoload 為 GameConst)
 
 const TILE_SIZE: int = 32
 const MAP_W: int = 13
