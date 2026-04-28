@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="LevelData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/level_data.gd" id="1_leveldata"]
+
+[resource]
+script = ExtResource("1_leveldata")
+map_layout = PackedStringArray("SSSS.....SSSS", "S...........S", "S.BBBBBBBBB.S", "S.B.......B.S", "S.B.SSSSS.B.S", "S.B.S...S.B.S", "..B.S.B.S.B..", "S.B.S...S.B.S", "S.B.SSSSS.B.S", "S.B.......B.S", "S.BBBBBBBBB.S", "S...........S", "SSSS.BEB.SSSS")
+player_spawn = Vector2i(6, 12)
+enemy_spawns = Array[Vector2i]([Vector2i(4, 0), Vector2i(6, 0), Vector2i(8, 0)])
+enemy_total = 16
+enemy_max_on_field = 6
+enemy_speed = 100.0
+spawn_interval = 1.5
+enemy_type_weights = {"basic": 20, "fast": 30, "heavy": 35, "boss": 15}
+display_name = "Stage 5 - BOSS 突擊"
+hint = "BOSS 出沒！一次只能處理一個目標。"

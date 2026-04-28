@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="LevelData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/level_data.gd" id="1_leveldata"]
+
+[resource]
+script = ExtResource("1_leveldata")
+map_layout = PackedStringArray("BBB.......BBB", "B.B.SSSSS.B.B", "B...........B", ".....BBB.....", "..B..B.B..B..", "..B..B.B..B..", "SSS.......SSS", "..B..B.B..B..", "..B..B.B..B..", ".....BBB.....", "B...........B", "B.B.......B.B", "BBB..BEB..BBB")
+player_spawn = Vector2i(6, 12)
+enemy_spawns = Array[Vector2i]([Vector2i(0, 0), Vector2i(6, 0), Vector2i(12, 0)])
+enemy_total = 9
+enemy_max_on_field = 4
+enemy_speed = 85.0
+spawn_interval = 2.0
+enemy_type_weights = {"basic": 60, "fast": 30, "heavy": 10}
+display_name = "Stage 3 - 重裝突擊"
+hint = "重裝坦克需要 2 發才能破壞。"

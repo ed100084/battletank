@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="LevelData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/level_data.gd" id="1_leveldata"]
+
+[resource]
+script = ExtResource("1_leveldata")
+map_layout = PackedStringArray(".............", "..BBB...BBB..", "..B.B...B.B..", "..B.B.B.B.B..", "..BBB.B.BBB..", ".....SSS.....", "......S......", ".....SSS.....", "..BBB.B.BBB..", "..B.B.B.B.B..", "..B.B...B.B..", ".....BBB.....", ".....BEB.....")
+player_spawn = Vector2i(4, 12)
+enemy_spawns = Array[Vector2i]([Vector2i(0, 0), Vector2i(6, 0), Vector2i(12, 0)])
+enemy_total = 5
+enemy_max_on_field = 3
+enemy_speed = 70.0
+spawn_interval = 2.5
+enemy_type_weights = {"basic": 100}
+display_name = "Stage 1 - 入門"
+hint = "歡迎來到坦克大決戰，先試試方向鍵與 SPACE。"

@@ -1,0 +1,135 @@
+[gd_scene load_steps=4 format=3 uid="uid://b0godot4lobby01"]
+
+[ext_resource type="Script" path="res://scripts/lobby.gd" id="1_lobby"]
+
+[sub_resource type="SystemFont" id="SystemFont_cjk"]
+font_names = PackedStringArray("Microsoft JhengHei UI", "Microsoft JhengHei", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK TC", "PingFang TC", "sans-serif")
+
+[sub_resource type="Theme" id="Theme_lobby"]
+default_font = SubResource("SystemFont_cjk")
+default_font_size = 22
+
+[node name="Lobby" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = SubResource("Theme_lobby")
+script = ExtResource("1_lobby")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.07, 0.07, 0.09, 1)
+
+[node name="Panel" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -440.0
+offset_top = -300.0
+offset_right = 440.0
+offset_bottom = 300.0
+
+[node name="Title" type="Label" parent="Panel"]
+layout_mode = 1
+offset_right = 880.0
+offset_bottom = 60.0
+text = "⚔  坦克大決戰"
+theme_override_font_sizes/font_size = 48
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Panel"]
+layout_mode = 1
+offset_top = 70.0
+offset_right = 880.0
+offset_bottom = 100.0
+text = "Single / Co-op vs CPU"
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.6, 0.85, 1, 1)
+horizontal_alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="Panel"]
+layout_mode = 1
+offset_left = 100.0
+offset_top = 130.0
+offset_right = 780.0
+offset_bottom = 180.0
+alignment = 1
+theme_override_constants/separation = 24
+
+[node name="Single" type="Button" parent="Panel/Buttons"]
+custom_minimum_size = Vector2(180, 50)
+layout_mode = 2
+text = "單人"
+
+[node name="Host" type="Button" parent="Panel/Buttons"]
+custom_minimum_size = Vector2(180, 50)
+layout_mode = 2
+text = "開房 (Host)"
+
+[node name="Join" type="Button" parent="Panel/Buttons"]
+custom_minimum_size = Vector2(180, 50)
+layout_mode = 2
+text = "加入房 (Join)"
+
+[node name="JoinRow" type="HBoxContainer" parent="Panel"]
+layout_mode = 1
+offset_left = 200.0
+offset_top = 200.0
+offset_right = 680.0
+offset_bottom = 240.0
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="IpInput" type="LineEdit" parent="Panel/JoinRow"]
+custom_minimum_size = Vector2(280, 38)
+layout_mode = 2
+placeholder_text = "對方 IP (例 192.168.1.10)"
+
+[node name="JoinConfirm" type="Button" parent="Panel/JoinRow"]
+custom_minimum_size = Vector2(120, 38)
+layout_mode = 2
+text = "連線"
+
+[node name="StagesLabel" type="Label" parent="Panel"]
+layout_mode = 1
+offset_left = 100.0
+offset_top = 260.0
+offset_right = 780.0
+offset_bottom = 290.0
+text = "選擇關卡 (🔒 表示尚未解鎖)"
+theme_override_font_sizes/font_size = 20
+
+[node name="Stages" type="ItemList" parent="Panel"]
+layout_mode = 1
+offset_left = 100.0
+offset_top = 295.0
+offset_right = 780.0
+offset_bottom = 470.0
+
+[node name="Play" type="Button" parent="Panel"]
+custom_minimum_size = Vector2(220, 50)
+layout_mode = 1
+offset_left = 330.0
+offset_top = 480.0
+offset_right = 550.0
+offset_bottom = 530.0
+text = "▶ 開始遊戲"
+
+[node name="Status" type="Label" parent="Panel"]
+layout_mode = 1
+offset_left = 60.0
+offset_top = 545.0
+offset_right = 820.0
+offset_bottom = 600.0
+text = ""
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+horizontal_alignment = 1
+autowrap_mode = 2

@@ -1,94 +1,177 @@
-# MyGodotGame
+# 坦克大決戰 Battle Tank
 
-Godot 4.x (Standard / GDScript) 專案 scaffold。
+> 經典坦克大戰復刻版 — Godot 4.6 / GDScript  
+> 程序生成精靈圖、5 關卡系統、4 種敵人、ENet 雙人連線
 
-## 環境資訊
+---
 
-| 項目 | 值 |
-|---|---|
-| Engine | Godot 4.x Standard |
-| 主要語言 | GDScript |
-| 目標平台 | Windows / Linux / Web (HTML5) |
-| 渲染器 | GL Compatibility (預設，可在 `project.godot` 切換為 Forward+/Mobile) |
-| 版本控制 | Git (local) |
+## 遊戲簡介
 
-## 資料夾結構
+《坦克大決戰》是以 Godot 4.6 打造的 2D 俯視角坦克對戰遊戲，向 1980 年代經典街機《Battle City》致敬。全部精靈圖以 GDScript 程序生成（Polygon2D），無需外部美術資源，開箱即玩。
+
+玩家駕駛黃色坦克保護中央老鷹基地，消滅全部敵軍坦克即可過關；老鷹基地被摧毀或玩家命數歸零則失敗。通關後自動進入下一關，共 5 個關卡。
+
+---
+
+## 功能列表
+
+| 功能 | 狀態 | 說明 |
+|------|------|------|
+| 核心玩法 | ✅ 已實裝 | 坦克移動、開砲、碰撞、地圖生成 |
+| 敵人系統 | ✅ 已實裝 | 4 種 AI 敵軍（基本兵 / 快速兵 / 重裝甲 / Boss） |
+| 磚牆 / 鋼牆 | ✅ 已實裝 | 磚牆可摧毀；鋼牆吸收子彈 |
+| 老鷹基地 | ✅ 已實裝 | 被摧毀即判定失敗 |
+| 邊界防護 | ✅ 已實裝 | 隱形 StaticBody2D 防止坦克出界 |
+| 關卡系統 | ✅ 已實裝 | 5 個 .tres 關卡資料、LevelManager、進度存檔 |
+| 多人連線 | ✅ 已實裝 | ENet P2P，port 7000，最多 2 人同屏協作 |
+| 大廳選單 | ✅ 已實裝 | Lobby 場景：單人 / 開房 / 加入房 / 選關 |
+| 無敵閃爍 | ✅ 已實裝 | 出生後短暫無敵 + 閃爍提示 |
+| Boss 散彈 | ✅ 已實裝 | Boss 坦克三向 ±15° 散彈、HP 5、體型 ×1.25 |
+| 道具系統 | 🔧 規劃中 | 6 種道具（詳見下方道具表） |
+| 音效系統 | 🔧 規劃中 | AudioManager + 射擊 / 爆炸 / BGM |
+| 粒子特效 | 🔧 規劃中 | GPUParticles2D 爆炸動畫 |
+| 計分系統 | 🔧 規劃中 | 擊殺積分、關卡完成加成 |
+
+---
+
+## 操作說明
+
+| 鍵位 | 動作 |
+|------|------|
+| ↑ ↓ ← → | 移動坦克 |
+| `Space` | 開砲 |
+| `Esc` | 暫停 / 繼續 |
+| 任意鍵（過關 / 失敗畫面）| 下一關 / 重試 |
+
+---
+
+## 道具說明表（規劃中）
+
+| 道具 | 效果 | 持續時間 |
+|------|------|----------|
+| 星星 | 子彈速度 x1.5，穿透鋼牆 | 10 秒 |
+| 護盾 | 玩家無敵 | 8 秒 |
+| 計時 | 凍結所有敵軍 | 6 秒 |
+| 炸彈 | 消滅場上全部敵軍 | 即時 |
+| 生命 | 增加 1 條命 | 即時 |
+| 堡壘 | 老鷹基地周圍換成鋼牆 | 永久 |
+
+---
+
+## 敵人類型表
+
+| 類型 | HP | 速度 | 特性 | 狀態 |
+|------|----|------|------|------|
+| 基本兵 | 1 | 慢 | 標準 AI 巡邏 | ✅ |
+| 快速兵 | 1 | +50% | 橙色，高機動性 | ✅ |
+| 重裝甲 | 2 | -30% | 灰色，多次命中 | ✅ |
+| Boss | 5 | -15% | 紫色，三向散彈，體型放大 | ✅ |
+
+---
+
+## 技術架構
+
+### 目錄結構
 
 ```
 .
-├─ assets/          # 美術資源
-│  ├─ sprites/      # 2D 角色/物件圖
-│  ├─ textures/     # 一般紋理 (含 3D)
-│  └─ models/       # 3D 模型 (.glb/.gltf)
-├─ scenes/          # .tscn 場景
-│  ├─ levels/       # 關卡
-│  ├─ ui/           # UI 場景
-│  └─ player/       # 玩家相關場景
-├─ scripts/         # GDScript
-│  ├─ autoload/     # 全域單例 (見 GameManager)
-│  ├─ components/   # 可重用元件 (Health, Movement, ...)
-│  └─ utils/        # 工具函式
+├─ scenes/
+│  ├─ Lobby.tscn           # 大廳選單（單人/開房/加入/選關）
+│  ├─ Main.tscn            # 遊戲主場景
+│  ├─ Tank.tscn            # 坦克（玩家 / 敵軍共用）
+│  ├─ Bullet.tscn          # 子彈
+│  ├─ Brick.tscn           # 磚牆（可破）
+│  ├─ Steel.tscn           # 鋼牆（不可破）
+│  └─ Eagle.tscn           # 老鷹基地
+├─ scripts/
+│  ├─ autoload/
+│  │  └─ game_manager.gd   # 全域狀態、暫停
+│  ├─ utils/
+│  │  └─ constants.gd      # TILE_SIZE、速度、方向 Enum
+│  ├─ level/
+│  │  ├─ level_data.gd     # Resource：關卡資料（地圖、敵軍配置）
+│  │  └─ level_manager.gd  # Autoload：載入 .tres、進度存檔
+│  ├─ network/
+│  │  └─ network_manager.gd # Autoload：ENet host/client/offline
+│  ├─ main.gd              # 遊戲主邏輯
+│  ├─ tank.gd              # 坦克邏輯（玩家 + AI + 多人 authority）
+│  ├─ bullet.gd            # 子彈移動、碰撞
+│  ├─ lobby.gd             # 大廳 UI 邏輯
+│  ├─ wall.gd              # 磚牆 / 鋼牆受損
+│  └─ eagle.gd             # 老鷹受損
+├─ levels/
+│  ├─ level_01.tres        # 入門關
+│  ├─ level_02.tres ~ level_05.tres
 ├─ audio/
-│  ├─ sfx/          # 音效
-│  └─ music/        # 背景音樂
-├─ fonts/           # 字型
-├─ addons/          # 第三方插件 (AssetLib)
-├─ docs/            # 設計文件、需求、changelog
-├─ .vscode/         # VS Code 推薦設定
-├─ project.godot    # Godot 專案設定
-├─ icon.svg         # 應用程式圖示
-└─ scenes/Main.tscn # 預設啟動場景
+│  ├─ sfx/                 # 音效 .wav — 待加入
+│  └─ music/               # BGM — 待加入
+├─ docs/
+│  ├─ ARCHITECTURE.md
+│  └─ HOW_TO_PLAY.md
+└─ project.godot
 ```
 
-## 開啟專案
-
-1. 開啟 Godot 4.x → Project Manager → **Import** → 選 `D:\workspace\Godot\project.godot`
-2. 第一次匯入會產生 `.godot/` 快取資料夾 (已被 `.gitignore` 排除)
-3. 按 **F5** 即可執行 Main 場景
-
-## 常用快捷鍵
-
-| 動作 | 鍵 |
-|---|---|
-| 執行專案 | F5 |
-| 執行當前場景 | F6 |
-| Stop | F8 |
-| 切換 Pause (執行期) | ESC (本專案 input map: `ui_pause`) |
-
-## Autoload (全域)
+### Autoload 列表
 
 | 名稱 | 路徑 | 用途 |
-|---|---|---|
+|------|------|------|
 | `GameManager` | `scripts/autoload/game_manager.gd` | 全域狀態、暫停事件 |
+| `GameConst` | `scripts/utils/constants.gd` | 地圖尺寸、速度、方向常數 |
+| `LevelManager` | `scripts/level/level_manager.gd` | 關卡載入、通關進度存檔 |
+| `NetworkManager` | `scripts/network/network_manager.gd` | ENet 多人連線管理 |
 
-## 架構建議
+### 碰撞層設計
 
-| 層 | 說明 |
-|---|---|
-| Scene 層 | 一個場景一個職責；用 `scenes/Main.tscn` 當 root，動態載入子場景 |
-| Script 層 | 用 `scripts/components/` 寫可重用元件 (Composition over Inheritance) |
-| Autoload 層 | 跨場景狀態 (存檔、設定、事件匯流) 才放這裡，避免濫用 |
+| Layer | 用途 |
+|-------|------|
+| 1 | 牆壁（Brick / Steel / Eagle / 邊界） |
+| 2 | 坦克（Tank） |
+| 4 | 子彈（Bullet） |
+
+---
+
+## 如何開啟
+
+1. 安裝 **Godot 4.6**（或更新版本）
+   ```powershell
+   winget install --id GodotEngine.GodotEngine --exact
+   ```
+2. 開啟 Godot Project Manager → **Import** → 選取本目錄的 `project.godot`
+3. 第一次匯入會產生 `.godot/` 快取資料夾（已由 `.gitignore` 排除）
+4. 按 **F5** 執行遊戲（從大廳場景開始）
+
+---
+
+## 多人連線說明
+
+採用 Godot 內建 **ENet** 協議進行 P2P 連線（listen-server 模式，主機同時也是玩家）：
+
+1. **主機**：在大廳按「開房 (Host)」，系統顯示本機 LAN IP
+2. **客戶端**：按「加入房 (Join)」輸入主機 IP → 「連線」
+3. 主機按「▶ 開始遊戲」，雙方同步切換到遊戲場景
+
+| 設定 | 值 |
+|------|----|
+| 通訊埠 | 7000 |
+| 最多玩家 | 2 人 |
+| 協議 | ENet UDP |
+| 主機顏色 | 黃色坦克 |
+| 客戶端顏色 | 藍色坦克 |
+
+---
 
 ## Roadmap
 
-- 短期：把 Main.tscn 換成正式遊戲類型 (2D/3D)、補上 player scene
-- 中期：建立基本 UI、存檔系統、設定選單
-- 長期：匯出 preset (Windows/Web)、CI build、AssetLib 套件選用
+- [ ] 道具系統：新增 6 種道具拾取機制
+- [ ] 音效系統：AudioManager singleton + 射擊 / 爆炸 / BGM
+- [ ] 爆炸特效：GPUParticles2D 坦克爆炸動畫
+- [ ] 計分系統：擊殺積分、連擊加成、高分榜
+- [ ] 更多關卡：關卡 6 以後、Boss 關
+- [ ] 匯出預設：Windows / Web (HTML5) 一鍵打包
+- [ ] 行動裝置：虛擬搖桿支援
 
-## Git
+---
 
-```powershell
-# 本地已 init
-git log --oneline    # 檢視 commit
-# 之後要推到遠端：
-git remote add origin <your-repo-url>
-git push -u origin main
-```
+## 授權
 
-## 安裝 Godot Editor
-
-```powershell
-winget install --id GodotEngine.GodotEngine --exact
-```
-
-(若改用 C#: `GodotEngine.GodotEngine.Mono`，並安裝 .NET 8 SDK)
+MIT License — 自由使用、修改、散布。

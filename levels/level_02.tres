@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="LevelData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/level_data.gd" id="1_leveldata"]
+
+[resource]
+script = ExtResource("1_leveldata")
+map_layout = PackedStringArray(".............", ".BB.B.B.B.BB.", ".B.........B.", "...BBB.BBB...", "...B..S..B...", ".....SSS.....", "..B..S.S..B..", ".....SSS.....", "...B..S..B...", "...BBB.BBB...", ".B.........B.", ".BB.B.B.B.BB.", ".....BEB.....")
+player_spawn = Vector2i(6, 12)
+enemy_spawns = Array[Vector2i]([Vector2i(0, 0), Vector2i(6, 0), Vector2i(12, 0)])
+enemy_total = 7
+enemy_max_on_field = 3
+enemy_speed = 80.0
+spawn_interval = 2.2
+enemy_type_weights = {"basic": 80, "fast": 20}
+display_name = "Stage 2 - 包圍"
+hint = "出現速度型敵軍，注意火力。"
