@@ -21,6 +21,7 @@ config/icon="res://icon.svg"
 
 GameManager="*res://scripts/autoload/game_manager.gd"
 GameConst="*res://scripts/utils/constants.gd"
+AudioManager="*res://scripts/autoload/audio_manager.gd"
 
 [display]
 
