@@ -1,35 +1,45 @@
 extends CharacterBody2D
 class_name Tank
 
+const EXPLOSION_SCENE := preload("res://scenes/Explosion.tscn")
+
 @export var bullet_scene: PackedScene
 @export var is_player: bool = false
 @export var move_speed: float = 100.0
 @export var body_color: Color = Color(0.95, 0.85, 0.30)
 @export var max_hp: int = 1
 @export var is_boss: bool = false
+@export var tank_type: String = "basic"
 
-signal died
+## death_position, tank_type
+signal died(death_position: Vector2, death_type: String)
 
 var hp: int = 1
 var direction: int = GameConst.Dir.UP
-var has_active_bullet: bool = false
+var active_bullets: int = 0
+var max_bullets: int = 1
 var ai_decide_timer: float = 0.0
 var invincible: bool = false
 var _blink_timer: float = 0.0
-var active_bullets: int = 0  # boss 可同時 3 發
+var is_frozen: bool = false
+var is_shielded: bool = false
 
-@onready var body_visual: Polygon2D = $Body
+var _shield_timer: float = 0.0
+var _shield_blink: float = 0.0
+var _shield_visual: Polygon2D = null
+
+@onready var body_visual: Polygon2D   = $Body
 @onready var turret_visual: Polygon2D = $Turret
 @onready var cannon_visual: Polygon2D = $Cannon
 
 func _ready() -> void:
 	hp = max_hp
-	body_visual.color = body_color
+	body_visual.color   = body_color
 	turret_visual.color = body_color.darkened(0.30)
 	cannon_visual.color = body_color.darkened(0.55)
 	if is_boss:
 		scale = Vector2(1.25, 1.25)
-	set_process(false)  # _process 只在無敵閃爍時啟用
+	set_process(false)
 	if is_player:
 		add_to_group("player")
 	else:
@@ -39,20 +49,34 @@ func _ready() -> void:
 	_update_facing()
 
 func _is_local_authority() -> bool:
-	# 沒有 multiplayer peer 時 = 單人，視為 authority
 	if not multiplayer.has_multiplayer_peer():
 		return true
 	return is_multiplayer_authority()
 
 func _physics_process(delta: float) -> void:
 	if not _is_local_authority():
-		# 遠端坦克：位置由 MultiplayerSynchronizer 同步，不跑邏輯
 		return
+	if is_frozen:
+		velocity = Vector2.ZERO
+		move_and_slide()
+		return
+
 	if is_player:
 		_player_input()
 	else:
 		_ai_logic(delta)
 	move_and_slide()
+
+	if is_shielded:
+		_shield_timer -= delta
+		_shield_blink += delta
+		if _shield_visual:
+			_shield_visual.visible = fmod(_shield_blink, 0.4) < 0.2
+		if _shield_timer <= 0.0:
+			is_shielded = false
+			if _shield_visual:
+				_shield_visual.queue_free()
+				_shield_visual = null
 
 func _player_input() -> void:
 	var new_dir: int = -1
@@ -92,13 +116,10 @@ func _ai_logic(delta: float) -> void:
 		_snap_to_grid_perp()
 
 	velocity = GameConst.DIR_VEC[direction] * move_speed
-
 	if randf() < 0.018:
 		_shoot()
 
 func _snap_to_grid_perp() -> void:
-	# 對齊到 cell center (ts/2 + n*ts) 而非 grid line (n*ts)
-	# 避免坦克瞬移到牆內或邊界外
 	var ts: float = float(GameConst.TILE_SIZE)
 	var half: float = ts / 2.0
 	if direction == GameConst.Dir.UP or direction == GameConst.Dir.DOWN:
@@ -110,8 +131,8 @@ func _update_facing() -> void:
 	rotation = GameConst.DIR_ANGLE[direction]
 
 func _shoot() -> void:
-	var max_bullets: int = 3 if is_boss else 1
-	if active_bullets >= max_bullets or bullet_scene == null:
+	var max_b: int = 3 if is_boss else max_bullets
+	if active_bullets >= max_b or bullet_scene == null:
 		return
 	var dir_vec: Vector2 = GameConst.DIR_VEC[direction]
 	if is_boss:
@@ -121,7 +142,6 @@ func _shoot() -> void:
 		_spawn_bullet(dir_vec.rotated(deg_to_rad(-15)))
 	else:
 		_spawn_bullet(dir_vec)
-	has_active_bullet = active_bullets > 0  # 兼容舊欄位
 
 func _spawn_bullet(dir_vec: Vector2) -> void:
 	var b: Node2D = bullet_scene.instantiate()
@@ -132,26 +152,37 @@ func _spawn_bullet(dir_vec: Vector2) -> void:
 	get_parent().add_child(b)
 	active_bullets += 1
 	b.tree_exited.connect(_on_bullet_freed)
+	AudioManager.play("shoot")
 
 func _on_bullet_freed() -> void:
 	active_bullets = max(0, active_bullets - 1)
-	has_active_bullet = active_bullets > 0
 
 func take_damage() -> void:
-	# 命中判定只在 authority 端做，避免雙方各扣一次
 	if not _is_local_authority():
 		return
-	if invincible:
+	if invincible or is_shielded:
 		return
 	hp -= 1
 	if hp > 0:
-		# 受傷閃白 0.12 秒提示
-		modulate = Color(2.0, 2.0, 2.0)
-		await get_tree().create_timer(0.12).timeout
-		modulate = Color.WHITE
+		_flash_damage()
 		return
-	died.emit()
+	var expl := EXPLOSION_SCENE.instantiate()
+	get_parent().add_child(expl)
+	expl.global_position = global_position
+	var sfx := "explosion_player" if is_player else "explosion_enemy"
+	AudioManager.play(sfx)
+	died.emit(global_position, tank_type)
 	queue_free()
+
+func _flash_damage() -> void:
+	body_visual.color   = Color.WHITE
+	turret_visual.color = Color.WHITE
+	cannon_visual.color = Color.WHITE
+	await get_tree().create_timer(0.1).timeout
+	if is_instance_valid(self):
+		body_visual.color   = body_color
+		turret_visual.color = body_color.darkened(0.30)
+		cannon_visual.color = body_color.darkened(0.55)
 
 func grant_invincibility(seconds: float) -> void:
 	invincible = true
@@ -161,9 +192,28 @@ func grant_invincibility(seconds: float) -> void:
 func _process(delta: float) -> void:
 	if _blink_timer > 0.0:
 		_blink_timer -= delta
-		# 每 0.1 秒切換 modulate 做閃爍
 		modulate.a = 0.4 if int(_blink_timer * 10.0) % 2 == 0 else 1.0
 		if _blink_timer <= 0.0:
 			invincible = false
 			modulate.a = 1.0
 			set_process(false)
+
+func apply_shield(duration: float) -> void:
+	is_shielded   = true
+	_shield_timer = duration
+	_shield_blink = 0.0
+	if _shield_visual == null:
+		_shield_visual = Polygon2D.new()
+		var pts := PackedVector2Array()
+		for i in range(16):
+			var a := i * TAU / 16.0
+			pts.append(Vector2(cos(a) * 20.0, sin(a) * 20.0))
+		_shield_visual.polygon = pts
+		_shield_visual.color   = Color(0.30, 0.65, 1.0, 0.50)
+		add_child(_shield_visual)
+
+func freeze() -> void:
+	is_frozen = true
+
+func unfreeze() -> void:
+	is_frozen = false

@@ -27,6 +27,7 @@ GameManager="*res://scripts/autoload/game_manager.gd"
 GameConst="*res://scripts/utils/constants.gd"
 LevelManager="*res://scripts/level/level_manager.gd"
 NetworkManager="*res://scripts/network/network_manager.gd"
+AudioManager="*res://scripts/autoload/audio_manager.gd"
 
 [display]
 
