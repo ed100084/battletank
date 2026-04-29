@@ -12,6 +12,8 @@ extends Control
 @onready var join_row: HBoxContainer = $Panel/JoinRow
 @onready var stage_list: ItemList = $Panel/Stages
 @onready var play_btn: Button = $Panel/Play
+@onready var reset_btn: Button = $Panel/ResetProgress
+@onready var reset_dialog: ConfirmationDialog = $ResetConfirm
 
 const MAIN_SCENE := "res://scenes/Main.tscn"
 
@@ -24,6 +26,8 @@ func _ready() -> void:
 	join_btn.pressed.connect(_on_join_toggle)
 	join_confirm_btn.pressed.connect(_on_join_confirm)
 	play_btn.pressed.connect(_on_play)
+	reset_btn.pressed.connect(_on_reset_pressed)
+	reset_dialog.confirmed.connect(_on_reset_confirmed)
 
 	NetworkManager.session_started.connect(_on_session_started)
 	NetworkManager.connection_failed.connect(_on_connection_failed)
@@ -85,12 +89,22 @@ func _on_play() -> void:
 	if NetworkManager.is_client():
 		_set_status("client 不能主動切場景，等 host 開始")
 		return
+	# 開新遊戲：重置分數/擊殺統計 (跨關不重置，由 _advance_stage 走另一條路)
 	if NetworkManager.is_offline():
+		GameManager.reset_session()
 		LevelManager.start_level(selected_stage)
 		get_tree().change_scene_to_file(MAIN_SCENE)
 	else:
-		# host: RPC 給所有 peer (含自己) 一起切場景
-		NetworkManager.rpc_start_match.rpc(selected_stage)
+		# host: RPC 給所有 peer (含自己) 一起切場景，reset_score=true
+		NetworkManager.rpc_start_match.rpc(selected_stage, true)
+
+func _on_reset_pressed() -> void:
+	reset_dialog.popup_centered()
+
+func _on_reset_confirmed() -> void:
+	LevelManager.reset_progress()
+	_refresh_stage_list()
+	_set_status("進度已重置")
 
 func _set_status(msg: String) -> void:
 	status_label.text = msg

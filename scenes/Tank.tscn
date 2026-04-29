@@ -27,6 +27,18 @@ properties/5/replication_mode = 0
 properties/6/path = NodePath(".:max_hp")
 properties/6/spawn = true
 properties/6/replication_mode = 0
+properties/7/path = NodePath(".:move_speed")
+properties/7/spawn = true
+properties/7/replication_mode = 0
+properties/8/path = NodePath(".:tank_type")
+properties/8/spawn = true
+properties/8/replication_mode = 0
+properties/9/path = NodePath(".:is_shielded")
+properties/9/spawn = true
+properties/9/replication_mode = 2
+properties/10/path = NodePath(".:is_frozen")
+properties/10/spawn = true
+properties/10/replication_mode = 2
 
 [node name="Tank" type="CharacterBody2D"]
 collision_layer = 2

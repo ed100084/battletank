@@ -25,7 +25,7 @@ func _physics_process(delta: float) -> void:
 		queue_free()
 
 func _on_body_entered(body: Node) -> void:
-	# 命中判定也只在 authority 端
+	# 命中判定只在 authority 端
 	if not _is_local_authority():
 		return
 	if body == shooter:
@@ -34,30 +34,29 @@ func _on_body_entered(body: Node) -> void:
 		return
 	if body.is_in_group("enemy") and not from_player:
 		return
-	_spawn_hit_spark()
-	if body.has_method("take_damage"):
+	var main := _get_main()
+	# 命中特效 RPC 廣播 (所有 peer 同時顯示)
+	if main:
+		main.rpc_spawn_hit_spark.rpc(global_position, direction_vec)
+	# 對 wall / eagle 走 RPC (因它們不是 MultiplayerSpawner 管理)；
+	# 對 tank 直接 take_damage (Tank 已透過 Spawner+Synchronizer 同步)
+	if body.is_in_group("walls"):
+		if main:
+			var ts: int = GameConst.TILE_SIZE
+			var gx: int = int(((body as Node2D).position.x - ts / 2.0) / ts)
+			var gy: int = int(((body as Node2D).position.y - ts / 2.0) / ts)
+			main.rpc_destroy_wall_at.rpc(gx, gy)
+	elif body.is_in_group("eagle"):
+		if main:
+			main.rpc_destroy_eagle.rpc()
+	elif body.has_method("take_damage"):
 		body.take_damage()
 	queue_free()
 
-func _spawn_hit_spark() -> void:
-	var p := CPUParticles2D.new()
-	p.emitting             = true
-	p.amount               = 6
-	p.lifetime             = 0.25
-	p.one_shot             = true
-	p.explosiveness        = 0.90
-	p.randomness           = 0.30
-	p.direction            = -direction_vec
-	p.spread               = 65.0
-	p.gravity              = Vector2(0.0, 280.0)
-	p.initial_velocity_min = 30.0
-	p.initial_velocity_max = 80.0
-	p.scale_amount_min     = 2.0
-	p.scale_amount_max     = 3.0
-	p.color                = Color(1.0, 0.85, 0.30)
-	get_parent().add_child(p)
-	p.global_position = global_position
-	get_tree().create_timer(0.45).timeout.connect(func():
-		if is_instance_valid(p):
-			p.queue_free()
-	)
+func _get_main() -> Node:
+	# bullet 加在 Arena 下；Arena.parent = Main
+	var p := get_parent()
+	if p:
+		return p.get_parent()
+	return null
+

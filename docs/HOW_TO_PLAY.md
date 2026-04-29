@@ -1,88 +1,107 @@
-# 坦克大決戰 (Battle City Clone)
-
-> 玩法**參考**任天堂 Battle City，所有圖形為自繪 Polygon2D，無使用任何任天堂受著作權保護素材。
+# 坦克大決戰 — How to Play
 
 ## 操作
 
 | 按鍵 | 動作 |
 |---|---|
 | ↑ ↓ ← → | 移動坦克 |
-| SPACE | 開砲 (一次只能有一發在場) |
-| 任意鍵 | Game Over 後重新開始 |
+| `Space` | 開砲 |
+| `Esc` | 暫停 / 繼續 (多人模式只有 host 能觸發) |
+| 任意鍵 (通關 / 失敗畫面) | 下一關 / 重試 |
+
+## 模式
+
+| 模式 | 路徑 |
+|---|---|
+| **單人** | Lobby → 單人 → 選關 → 開始遊戲 |
+| **LAN co-op (Host)** | Lobby → 開房 → 等對手連入 → 選關 → 開始遊戲 |
+| **LAN co-op (Client)** | Lobby → 加入房 → 輸入 host 的 LAN IP → 連線 → 等 host 開始 |
+| **進度重置** | Lobby 右上角「重置進度」按鈕 → 確認 |
+
+LAN port: **7000**；最多 **2 人**。
 
 ## 規則
 
-- 玩家初始 **3 條命**
-- 場上隨時最多 **3 台**敵軍坦克，總共 **5 台**
-- 殲滅 5 台敵軍 → **勝利**
-- 玩家命數歸零 / 老鷹基地被打中 → **失敗**
+- 玩家初始 **3 條命** (兩玩家共用)
+- 殲滅當關所有敵軍 → **STAGE CLEAR** → 自動進下一關
+- 玩家命數歸零 / 老鷹基地被打中 → **GAME OVER** → 按任意鍵從當關重來 (score 重置)
+- **跨關 score 累積**；Game Over 重來 / Lobby 開新場才重置
 
 ## 地圖元素
 
 | 符號 | 物件 | 行為 |
 |---|---|---|
-| `B` | 磚牆 (Brick) | 中彈即破，可作戰術掩體 |
-| `S` | 鋼牆 (Steel) | 不可破，子彈被吸收 |
+| `B` | 磚牆 | 中彈即破，可作戰術掩體 |
+| `S` | 鋼牆 | 不可破，子彈被吸收 |
 | `E` | 老鷹基地 | 被打到即遊戲失敗 |
 | `.` | 空地 | 可通行 |
 
-## 程式架構
+## 敵軍類型
 
-```
-Main (Node2D)             ← 主場景，地圖建構/spawn/勝負
- ├─ Background            ← ColorRect 全螢幕底色
- ├─ ArenaFrame            ← 戰場外框
- ├─ Arena (Node2D)        ← 所有遊戲物件 parent (座標 0..416)
- │   ├─ Brick × N
- │   ├─ Steel × N
- │   ├─ Eagle × 1
- │   ├─ Tank (Player)
- │   ├─ Tank (Enemy) × 3
- │   └─ Bullet × N
- ├─ SpawnTimer
- └─ UI (CanvasLayer)
-     └─ Panel (Control + Theme)
-         ├─ Title / Info / Help / Status
-```
-
-## 物件層級
-
-| Scene | 父型別 | Group | Layer | 職責 |
+| 類型 | 顏色 | HP | 速度 | 特性 |
 |---|---|---|---|---|
-| Tank.tscn | CharacterBody2D | `player` 或 `enemy` | 2 | 移動 + 開砲；玩家走 input、敵軍走 AI |
-| Bullet.tscn | Area2D | `bullets` | 4 | 直線飛行、偵測碰撞、敵我識別 |
-| Brick.tscn | StaticBody2D | `walls` | 1 | 中彈即毀 |
-| Steel.tscn | StaticBody2D | `walls` | 1 | 不可破 |
-| Eagle.tscn | StaticBody2D | `eagle` | 1 | 中彈即遊戲結束 |
+| 基本兵 | 紅 | 1 | 1× | 標準巡邏 AI |
+| 快速兵 | 橙 | 1 | 1.5× | 高機動性 |
+| 重裝甲 | 灰 | 2 | 0.7× | 兩發才破 |
+| Boss | 紫 | 5 | 0.85× | 三向散彈 ±15°，體型 ×1.25，警報音 |
+| **MEGA** | 暗紅 | **10** | 0.6× | 三向散彈 + 體型 ×1.5，僅 Stage 20 出現 |
 
-## Collision Layer / Mask 設計
+每關的敵軍配比由 `levels/level_XX.tres` 的 `enemy_type_weights` 決定。
 
-| 物件 | Layer | Mask | 為何 |
+## 道具
+
+道具由敵軍掉落 (基本 20% 機率，Boss 100%)，10 秒未拾取消失 (最後 3 秒閃爍)：
+
+| 道具 | 圖示 | 效果 | 持續 |
 |---|---|---|---|
-| Walls / Eagle | 1 | 0 | 靜態，自己不需偵測，被動被撞 |
-| Tanks | 2 | 3 (1+2) | 撞牆、撞別坦克 |
-| Bullets | 4 | 3 (1+2) | 偵測牆、偵測坦克；不偵測別子彈 |
+| ★ Star | 星星 | 子彈最大同時 2 發 | 永久 (至死亡) |
+| 盾 Shield | 盾 | 無敵 | 10 秒 |
+| 炸 Bomb | 炸 | 立即殲滅場上所有敵軍 | 即時 |
+| 凍 Clock | 凍 | 凍結敵軍 | 5 秒 |
+| 鏟 Shovel | 鏟 | 老鷹周圍 8 格暫變鋼牆 | 15 秒 |
+| 命 Extra Life | 命 | +1 條命 | 即時 |
 
-## AI 行為
+## 計分
 
-- 每 0.8 ~ 2.2 秒隨機改變方向
-- 撞到任何東西立即改方向 (用 `get_slide_collision_count()` 偵測)
-- 改方向時對齊網格 (避免卡角)
-- 每 frame ~1.8% 機率開砲
+| 擊殺 | 分數 |
+|---|---|
+| 基本兵 | 100 |
+| 快速兵 | 200 |
+| 重裝甲 | 300 |
+| Boss | 500 |
+| MEGA | 1000 |
 
-## 設計亮點
+最高分自動更新到當前 session (尚未存檔到 disk)。
 
-1. **網格對齊轉向** — `_snap_to_grid_perp()` 讓坦克轉向時自動對齊網格，避免卡在牆角，這是 Battle City 流暢手感的關鍵。
-2. **單發子彈限制** — `has_active_bullet` flag + `bullet.tree_exited` signal，子彈消失才能再開一發 (還原 NES 機制)。
-3. **敵我識別** — Bullet 帶 `from_player` 旗標，避免自己誤傷友軍坦克。
-4. **Composition over Inheritance** — Wall 用 `wall_type` enum 區分磚 / 鋼，不用繼承樹。
+## 20 個關卡
 
-## 可以延伸
+| 關卡 | 主題 | 敵總數 | 同屏 | 敵速 | 配比 |
+|---|---|---|---|---|---|
+| 1 | 入門 | 5 | 3 | 70 | basic 100% |
+| 2 | 包圍 | 7 | 3 | 80 | basic 80 / fast 20 |
+| 3 | 重裝突擊 | 9 | 4 | 85 | basic 60 / fast 30 / heavy 10 |
+| 4 | 棋盤亂戰 | 12 | 5 | 90 | basic 40 / fast 35 / heavy 25 |
+| 5 | BOSS 突擊 | 16 | 6 | 100 | basic 20 / fast 30 / heavy 35 / boss 15 |
+| 6 | 雙城堡 | 18 | 6 | 100 | basic 15 / fast 30 / heavy 40 / boss 15 |
+| 7 | 稀疏棋盤 | 20 | 6 | 105 | basic 10 / fast 30 / heavy 40 / boss 20 |
+| 8 | 鋼鐵交叉 | 22 | 7 | 105 | fast 30 / heavy 40 / boss 30 |
+| 9 | 圍剿 | 24 | 7 | 110 | fast 25 / heavy 35 / boss 40 |
+| 10 | BOSS 終戰 | 26 | 8 | 115 | heavy 40 / boss 60 |
+| 11 | 雙重圍牆 | 22 | 7 | 110 | fast 25 / heavy 45 / boss 30 |
+| 12 | 螺旋風暴 | 24 | 7 | 115 | fast 20 / heavy 40 / boss 40 |
+| 13 | 冰封要塞 | 26 | 8 | 115 | fast 15 / heavy 45 / boss 40 |
+| 14 | 高速通道 | 28 | 8 | 120 | fast 50 / heavy 20 / boss 30 |
+| 15 | 🔱 BOSS RUSH | 12 | 6 | 100 | **boss 100%** |
+| 16 | 連鎖反應 | 28 | 8 | 120 | heavy 40 / boss 60 |
+| 17 | 無人之境 | 30 | 9 | 125 | heavy 35 / boss 65 |
+| 18 | 鋼鐵地獄 | 32 | 9 | 125 | heavy 35 / boss 65 |
+| 19 | 終結倒數 | 30 | 9 | 130 | heavy 30 / boss 70 |
+| 20 | ⚔ 終焉之戰 | 30 | 8 | 130 | heavy 15 / boss 50 / **mega 35** |
 
-- **磚牆 4 子格分別破壞** (進階：把 Brick 拆 4 個小 ColorRect，依子彈位置只破其中一塊)
-- **道具系統** (星星升級、炸彈、護盾、補命)
-- **多關卡** (`MAP` 改成 `Array[Array[String]]` + 關卡編號)
-- **二人本機合作** (新增 P2 InputMap WASD + Q 開砲)
-- **敵軍類型** (一般 / 高速 / 重裝甲，用 `Tank.enemy_type` enum)
-- **音效** (砲擊、中彈、爆炸、勝利音樂；放 `audio/sfx/`)
-- **計分高分** (用 `user://highscore.cfg`)
+## Tips
+
+- 守住老鷹基地比殺敵重要
+- Boss 出現會有警報音，把它引離老鷹再打
+- 重裝甲坦克擊破時掉道具機率變高 (繼承 20%)
+- 多人模式：host 看到對手是藍色，client 看到自己是藍色；操作體驗一致
+- 暫停在多人模式只有 host 能觸發，雙端同步停止

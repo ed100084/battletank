@@ -22,7 +22,7 @@ var ai_decide_timer: float = 0.0
 var invincible: bool = false
 var _blink_timer: float = 0.0
 var is_frozen: bool = false
-var is_shielded: bool = false
+var is_shielded: bool = false : set = _set_shielded
 
 var _shield_timer: float = 0.0
 var _shield_blink: float = 0.0
@@ -38,7 +38,8 @@ func _ready() -> void:
 	turret_visual.color = body_color.darkened(0.30)
 	cannon_visual.color = body_color.darkened(0.55)
 	if is_boss:
-		scale = Vector2(1.25, 1.25)
+		# Mega boss 比一般 boss 更巨大
+		scale = Vector2(1.5, 1.5) if tank_type == "mega" else Vector2(1.25, 1.25)
 	set_process(false)
 	if is_player:
 		add_to_group("player")
@@ -73,10 +74,7 @@ func _physics_process(delta: float) -> void:
 		if _shield_visual:
 			_shield_visual.visible = fmod(_shield_blink, 0.4) < 0.2
 		if _shield_timer <= 0.0:
-			is_shielded = false
-			if _shield_visual:
-				_shield_visual.queue_free()
-				_shield_visual = null
+			is_shielded = false  # setter 會自動移除 visual + 透過 sync 廣播給 client
 
 func _player_input() -> void:
 	var new_dir: int = -1
@@ -152,7 +150,7 @@ func _spawn_bullet(dir_vec: Vector2) -> void:
 	get_parent().add_child(b)
 	active_bullets += 1
 	b.tree_exited.connect(_on_bullet_freed)
-	AudioManager.play("shoot")
+	AudioManager.play_synced("shoot")
 
 func _on_bullet_freed() -> void:
 	active_bullets = max(0, active_bullets - 1)
@@ -166,11 +164,12 @@ func take_damage() -> void:
 	if hp > 0:
 		_flash_damage()
 		return
+	# 位置必須在 add_child 前設好，spawn-replication 才會帶到 client
 	var expl := EXPLOSION_SCENE.instantiate()
+	expl.position = position
 	get_parent().add_child(expl)
-	expl.global_position = global_position
 	var sfx := "explosion_player" if is_player else "explosion_enemy"
-	AudioManager.play(sfx)
+	AudioManager.play_synced(sfx)
 	died.emit(global_position, tank_type)
 	queue_free()
 
@@ -199,18 +198,32 @@ func _process(delta: float) -> void:
 			set_process(false)
 
 func apply_shield(duration: float) -> void:
-	is_shielded   = true
+	# 只有 authority 處理 timer (倒數結束 → is_shielded = false 透過 sync 廣播)
+	if not _is_local_authority():
+		return
 	_shield_timer = duration
 	_shield_blink = 0.0
-	if _shield_visual == null:
-		_shield_visual = Polygon2D.new()
-		var pts := PackedVector2Array()
-		for i in range(16):
-			var a := i * TAU / 16.0
-			pts.append(Vector2(cos(a) * 20.0, sin(a) * 20.0))
-		_shield_visual.polygon = pts
-		_shield_visual.color   = Color(0.30, 0.65, 1.0, 0.50)
-		add_child(_shield_visual)
+	is_shielded = true  # setter 會建 visual
+
+func _set_shielded(v: bool) -> void:
+	is_shielded = v
+	if v:
+		if _shield_visual == null and is_inside_tree():
+			_create_shield_visual()
+	else:
+		if _shield_visual:
+			_shield_visual.queue_free()
+			_shield_visual = null
+
+func _create_shield_visual() -> void:
+	_shield_visual = Polygon2D.new()
+	var pts := PackedVector2Array()
+	for i in range(16):
+		var a := i * TAU / 16.0
+		pts.append(Vector2(cos(a) * 20.0, sin(a) * 20.0))
+	_shield_visual.polygon = pts
+	_shield_visual.color   = Color(0.30, 0.65, 1.0, 0.50)
+	add_child(_shield_visual)
 
 func freeze() -> void:
 	is_frozen = true

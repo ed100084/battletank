@@ -6,6 +6,7 @@
 script = ExtResource("1_leveldata")
 map_layout = PackedStringArray(".............", "..BBB...BBB..", "..B.B...B.B..", "..B.B.B.B.B..", "..BBB.B.BBB..", ".....SSS.....", "......S......", ".....SSS.....", "..BBB.B.BBB..", "..B.B.B.B.B..", "..B.B...B.B..", ".....BBB.....", ".....BEB.....")
 player_spawn = Vector2i(4, 12)
+player_spawns = Array[Vector2i]([Vector2i(4, 12), Vector2i(8, 12)])
 enemy_spawns = Array[Vector2i]([Vector2i(0, 0), Vector2i(6, 0), Vector2i(12, 0)])
 enemy_total = 5
 enemy_max_on_field = 3

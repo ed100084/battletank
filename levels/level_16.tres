@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="LevelData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/level_data.gd" id="1_leveldata"]
+
+[resource]
+script = ExtResource("1_leveldata")
+map_layout = PackedStringArray(".............", ".BBB.....BBB.", ".B.BBBBBBB.B.", ".B.B.....B.B.", ".B.B.SSS.B.B.", ".B.B.S.S.B.B.", ".B.B.....B.B.", ".B.B.S.S.B.B.", ".B.B.SSS.B.B.", ".B.B.....B.B.", ".B.BBBBBBB.B.", ".BBB.BBB.BBB.", ".....BEB.....")
+player_spawn = Vector2i(4, 12)
+player_spawns = Array[Vector2i]([Vector2i(4, 12), Vector2i(8, 12)])
+enemy_spawns = Array[Vector2i]([Vector2i(0, 0), Vector2i(6, 0), Vector2i(12, 0)])
+enemy_total = 28
+enemy_max_on_field = 8
+enemy_speed = 120.0
+spawn_interval = 1.2
+enemy_type_weights = {"heavy": 40, "boss": 60}
+display_name = "Stage 16 - 連鎖反應"
+hint = "雙層磚牆；打通一層引發下一波 BOSS 海。"

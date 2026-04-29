@@ -36,3 +36,6 @@ logs/
 # OS
 $RECYCLE.BIN/
 *.tmp
+
+# Claude / Cowork session metadata
+.claude/

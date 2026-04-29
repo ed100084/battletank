@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="LevelData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/level_data.gd" id="1_leveldata"]
+
+[resource]
+script = ExtResource("1_leveldata")
+map_layout = PackedStringArray(".............", ".SSSSS.SSSSS.", ".S.........S.", ".S.SS...SS.S.", ".S.S.B.B.S.S.", ".S...B.B...S.", ".S.B.SSS.B.S.", ".S...B.B...S.", ".S.S.B.B.S.S.", ".S.SS...SS.S.", ".S.........S.", ".SSSSBBBSSSS.", ".....BEB.....")
+player_spawn = Vector2i(4, 12)
+player_spawns = Array[Vector2i]([Vector2i(4, 12), Vector2i(8, 12)])
+enemy_spawns = Array[Vector2i]([Vector2i(0, 0), Vector2i(6, 0), Vector2i(12, 0)])
+enemy_total = 30
+enemy_max_on_field = 8
+enemy_speed = 130.0
+spawn_interval = 1.1
+enemy_type_weights = {"heavy": 15, "boss": 50, "mega": 35}
+display_name = "Stage 20 - ⚔ 終焉之戰"
+hint = "MEGA BOSS 登場！HP 10、體型巨大、三向散彈。守住老鷹，戰至最後一刻。"

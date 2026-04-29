@@ -2,10 +2,6 @@ extends Node
 ## 全域關卡管理 (autoload: LevelManager)
 ## 負責：載入關卡列表、追蹤當前進度、存讀檔
 
-signal level_changed(level_index: int, data: LevelData)
-signal level_cleared(level_index: int)
-signal all_levels_cleared
-
 const SAVE_PATH := "user://save.cfg"
 const LEVEL_DIR := "res://levels"
 
@@ -51,17 +47,13 @@ func start_level(index: int) -> void:
 		push_error("[LevelManager] invalid level index %d" % index)
 		return
 	current_index = index
-	level_changed.emit(current_index, get_current())
 
 func mark_cleared() -> void:
-	level_cleared.emit(current_index)
 	if current_index > highest_unlocked:
 		highest_unlocked = current_index
 	if current_index + 1 < levels.size():
 		highest_unlocked = max(highest_unlocked, current_index + 1)
 	_save()
-	if current_index + 1 >= levels.size():
-		all_levels_cleared.emit()
 
 func advance_to_next() -> bool:
 	if current_index + 1 >= levels.size():

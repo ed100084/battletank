@@ -21,13 +21,18 @@ const _LABELS := {
 	Type.EXTRA_LIFE: "命",
 }
 
-signal collected(powerup_type: int)
+signal collected(powerup_type: int, picker: Node)
 
 @export var powerup_type: int = Type.STAR
 
 var _lifetime: float = 10.0
 var _blink_acc: float = 0.0
 var _icon: Polygon2D
+
+func _is_local_authority() -> bool:
+	if not multiplayer.has_multiplayer_peer():
+		return true
+	return is_multiplayer_authority()
 
 func _ready() -> void:
 	add_to_group("powerups")
@@ -119,6 +124,9 @@ func _process(delta: float) -> void:
 		visible = fmod(_blink_acc, 0.30) < 0.15
 
 func _on_body_entered(body: Node) -> void:
+	# 多人模式下只 authority 端偵測拾取，避免雙端 race (各算一次)
+	if not _is_local_authority():
+		return
 	if body.is_in_group("player"):
-		collected.emit(powerup_type)
+		collected.emit(powerup_type, body)
 		queue_free()

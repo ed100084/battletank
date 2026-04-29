@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="LevelData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/level_data.gd" id="1_leveldata"]
+
+[resource]
+script = ExtResource("1_leveldata")
+map_layout = PackedStringArray(".............", ".SSS.SSS.SSS.", ".S.S.S.S.S.S.", ".SSS.S.S.SSS.", ".....S.S.....", ".SSS.SSS.SSS.", ".S.S.....S.S.", ".SSS.SSS.SSS.", ".....S.S.....", ".SSS.S.S.SSS.", ".S.S.S.S.S.S.", ".SSS.BBB.SSS.", ".....BEB.....")
+player_spawn = Vector2i(4, 12)
+player_spawns = Array[Vector2i]([Vector2i(4, 12), Vector2i(8, 12)])
+enemy_spawns = Array[Vector2i]([Vector2i(0, 0), Vector2i(6, 0), Vector2i(12, 0)])
+enemy_total = 32
+enemy_max_on_field = 9
+enemy_speed = 125.0
+spawn_interval = 1.1
+enemy_type_weights = {"heavy": 35, "boss": 65}
+display_name = "Stage 18 - 鋼鐵地獄"
+hint = "鋼鐵塔林；視野受限到極致，伏擊與被伏擊一線之隔。"

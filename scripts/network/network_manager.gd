@@ -19,6 +19,8 @@ var peer: ENetMultiplayerPeer = null
 var players: Dictionary = {}  # peer_id -> { "name": String, ... }
 
 func _ready() -> void:
+	# 暫停中也要能收 RPC (例如恢復暫停的訊號)
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
@@ -111,8 +113,12 @@ func _on_server_disconnected() -> void:
 
 # ---------- 場景切換 RPC ----------
 ## host 呼叫 → 所有 peer (含 host) 切到 Main 場景並載入指定關卡
+## reset_score=true 代表「新一場」(從 Lobby 開始)；
+## reset_score=false 代表「進下一關」(保留累積分數)
 @rpc("authority", "call_local", "reliable")
-func rpc_start_match(level_index: int) -> void:
+func rpc_start_match(level_index: int, reset_score: bool = false) -> void:
+	if reset_score:
+		GameManager.reset_session()
 	LevelManager.start_level(level_index)
 	get_tree().change_scene_to_file("res://scenes/Main.tscn")
 

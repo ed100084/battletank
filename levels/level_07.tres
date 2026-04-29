@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="LevelData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/level_data.gd" id="1_leveldata"]
+
+[resource]
+script = ExtResource("1_leveldata")
+map_layout = PackedStringArray(".............", ".B.B.B.B.B.B.", ".............", ".B.B.B.B.B.B.", ".............", "......S......", ".....SSS.....", "......S......", ".............", ".B.B.B.B.B.B.", ".............", ".B.B.B.B.B.B.", ".....BEB.....")
+player_spawn = Vector2i(4, 12)
+player_spawns = Array[Vector2i]([Vector2i(4, 12), Vector2i(8, 12)])
+enemy_spawns = Array[Vector2i]([Vector2i(0, 0), Vector2i(6, 0), Vector2i(12, 0)])
+enemy_total = 20
+enemy_max_on_field = 6
+enemy_speed = 105.0
+spawn_interval = 1.4
+enemy_type_weights = {"basic": 10, "fast": 30, "heavy": 40, "boss": 20}
+display_name = "Stage 7 - 稀疏棋盤"
+hint = "視野開闊但磚柱遮蔽多，預判走位最重要。"

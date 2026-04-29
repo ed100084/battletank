@@ -1,7 +1,7 @@
 # 坦克大決戰 Battle Tank
 
 > 經典坦克大戰復刻版 — Godot 4.6 / GDScript  
-> 程序生成精靈圖、5 關卡系統、4 種敵人、ENet 雙人連線、音效道具計分全實裝
+> 程序生成精靈圖、20 關卡系統、5 種敵人 (含 MEGA boss)、ENet 雙人連線、音效道具計分全實裝
 
 ---
 
@@ -115,10 +115,11 @@
 
 | 名稱 | 路徑 | 用途 |
 |------|------|------|
-| `GameManager` | `scripts/autoload/game_manager.gd` | 全域狀態、暫停事件 |
+| `GameManager` | `scripts/autoload/game_manager.gd` | 共享狀態（score / kill_counts / pause flag） |
 | `GameConst` | `scripts/utils/constants.gd` | 地圖尺寸、速度、方向常數 |
-| `LevelManager` | `scripts/level/level_manager.gd` | 關卡載入、通關進度存檔 |
-| `NetworkManager` | `scripts/network/network_manager.gd` | ENet 多人連線管理 |
+| `LevelManager` | `scripts/level/level_manager.gd` | 關卡 .tres 自動掃載、解鎖進度存檔 |
+| `NetworkManager` | `scripts/network/network_manager.gd` | ENet host/client/offline，場景切換 RPC |
+| `AudioManager` | `scripts/autoload/audio_manager.gd` | SFX/BGM 播放，含 `play_synced()` 跨 peer 廣播 |
 
 ### 碰撞層設計
 
@@ -132,13 +133,26 @@
 
 ## 如何開啟
 
-1. 安裝 **Godot 4.6**（或更新版本）
-   ```powershell
-   winget install --id GodotEngine.GodotEngine --exact
-   ```
-2. 開啟 Godot Project Manager → **Import** → 選取本目錄的 `project.godot`
-3. 第一次匯入會產生 `.godot/` 快取資料夾（已由 `.gitignore` 排除）
-4. 按 **F5** 執行遊戲（從大廳場景開始）
+### 前置：安裝 Godot 4.6
+
+```powershell
+winget install --id GodotEngine.GodotEngine --exact
+```
+
+### 一鍵啟動 (推薦，免 export)
+
+| 用途 | 雙擊執行 |
+|---|---|
+| 單人遊玩 / 自行加入房 | `play.bat` |
+| LAN 雙開測試 (host + client) | `play-lan.bat` |
+
+`play-lan.bat` 會在桌面左側開 host 視窗、右側開 client 視窗，並印出操作步驟。
+
+### 從 Godot Editor 啟動 (開發用)
+
+1. 開啟 Godot Project Manager → **Import** → 選取本目錄的 `project.godot`
+2. 第一次匯入會產生 `.godot/` 快取資料夾（已由 `.gitignore` 排除）
+3. 按 **F5** 執行遊戲（從大廳場景開始）
 
 ---
 
@@ -166,7 +180,11 @@
 - [x] 音效系統：AudioManager singleton + 射擊 / 爆炸 / BGM / Boss警報
 - [x] 爆炸特效：Explosion.tscn 坦克爆炸動畫
 - [x] 計分系統：擊殺積分、最高分記錄、過關分數顯示
+- [x] 多人同步：Wall/Eagle/Powerup/Explosion/UI/Audio 全 RPC 同步
+- [x] 暫停 (ESC)：多人模式 host 觸發 → RPC 同步雙端
+- [x] 重置進度按鈕：Lobby 右上角，含確認對話框
 - [ ] 更多關卡：關卡 6 以後、Boss 關
+- [ ] NAT 穿透：UPnP 自動開 port，公網對戰
 - [ ] 匯出預設：Windows / Web (HTML5) 一鍵打包
 - [ ] 行動裝置：虛擬搖桿支援
 

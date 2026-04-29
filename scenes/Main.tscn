@@ -38,7 +38,7 @@ color = Color(0.13, 0.14, 0.16, 1)
 position = Vector2(40, 40)
 
 [node name="Spawner" type="MultiplayerSpawner" parent="Arena"]
-_spawnable_scenes = PackedStringArray("res://scenes/Tank.tscn", "res://scenes/Bullet.tscn")
+_spawnable_scenes = PackedStringArray("res://scenes/Tank.tscn", "res://scenes/Bullet.tscn", "res://scenes/Powerup.tscn", "res://scenes/Explosion.tscn")
 spawn_path = NodePath("..")
 
 [node name="SpawnTimer" type="Timer" parent="."]

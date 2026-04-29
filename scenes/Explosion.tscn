@@ -1,6 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://b0godot4expl01"]
+[gd_scene load_steps=3 format=3 uid="uid://b0godot4expl01"]
 
 [ext_resource type="Script" path="res://scripts/explosion.gd" id="1_expl"]
 
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_expl"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 0
+
 [node name="Explosion" type="Node2D"]
 script = ExtResource("1_expl")
+
+[node name="Sync" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_expl")

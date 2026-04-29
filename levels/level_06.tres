@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="LevelData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/level_data.gd" id="1_leveldata"]
+
+[resource]
+script = ExtResource("1_leveldata")
+map_layout = PackedStringArray(".............", ".BBB.....BBB.", ".B.B.....B.B.", ".B.B.SSS.B.B.", ".BBB.S.S.BBB.", ".....S.S.....", "......S......", ".....S.S.....", ".BBB.S.S.BBB.", ".B.B.SSS.B.B.", ".B.B.....B.B.", ".BBB.....BBB.", ".....BEB.....")
+player_spawn = Vector2i(4, 12)
+player_spawns = Array[Vector2i]([Vector2i(4, 12), Vector2i(8, 12)])
+enemy_spawns = Array[Vector2i]([Vector2i(0, 0), Vector2i(6, 0), Vector2i(12, 0)])
+enemy_total = 18
+enemy_max_on_field = 6
+enemy_speed = 100.0
+spawn_interval = 1.5
+enemy_type_weights = {"basic": 15, "fast": 30, "heavy": 40, "boss": 15}
+display_name = "Stage 6 - 雙城堡"
+hint = "兩座磚石堡壘對峙；中央鋼牆隔絕視線。"
